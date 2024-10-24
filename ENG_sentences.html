@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Englannin lauseoppimispeli</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+        }
+        .game-container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        .feedback {
+            margin: 10px 0;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Englannin lauseoppimispeli</h1>
+        <p id="sentence-display">Suomenkielinen lause: <span id="finnish-sentence"></span></p>
+        <input type="text" id="answer" placeholder="Kirjoita englanninkielinen käännös" />
+        <div class="feedback" id="feedback"></div>
+        <button id="submit-answer">Tarkista vastaus</button>
+        <button id="next-sentence" disabled>Seuraava lause</button>
+
+        <div id="summary" class="summary" style="display: none;">
+            <h2>Yhteenveto</h2>
+            <p id="correct-answers"></p>
+            <p id="incorrect-answers"></p>
+            <button id="start-over">Aloita alusta</button>
+        </div>
+    </div>
+
+    <script>
+        // Lisää tähän lauseet samalla tavalla kuin teimme sanojen kanssa
+        const sentences = [
+            // { finnish: 'Millaista siellä on?', english: 'What\'s it like there?' },
+    { finnish: 'Olen yksitoista vuotta vanha.', english: 'I am eleven years old.' },
+    { finnish: 'Minulla on uusi koululaukku.', english: 'I have a new school bag.' },
+    { finnish: 'Siskollani on ruskea hamsteri.', english: 'My sister has a brown hamster.' },
+    { finnish: 'Onko sinulla myös hamsteri?', english: 'Do you have a hamster, too?' },
+    { finnish: 'Minulla ei ole draamakerhoa tänään.', english: "I don't have my drama club today." },
+    { finnish: 'Tom on nyt Yhdysvalloissa.', english: 'Tom is in the US now.' },
+    { finnish: 'Hän ei ole enää Lontoossa.', english: "He isn't in London anymore." },
+    { finnish: 'Heillä on uusi opettaja.', english: 'They have a new teacher.' },
+    { finnish: 'Hänellä ei ole ruskeita hiuksia.', english: "She doesn't have brown hair." },
+    { finnish: 'Missä kirjani ovat?', english: 'Where are my books?' },
+    { finnish: 'Minulla on kissa.', english: 'I have a cat.' },
+    { finnish: 'Minulla ei ole koiraa.', english: "I don't have a dog." },
+    { finnish: 'Mollylla on koira.', english: 'Molly has a dog.' },
+    { finnish: 'Olen kissa.', english: 'I am a cat.' },
+    { finnish: 'En ole rotta.', english: "I'm not a rat." },
+    { finnish: 'Onko sinulla lemmikki?', english: 'Do you have a pet?' },
+    { finnish: 'Kuinka monta mailia on täältä New Yorkiin?', english: 'How many miles is it from here to New York?' },
+    { finnish: 'Se on 560 mailia.', english: "It's 560 miles." },
+    { finnish: 'Todellako?', english: 'Really?' },
+    { finnish: 'Kuinka kauan kestää mennä New Yorkiin?', english: 'How long does it take to go to New York?' },
+    { finnish: 'Se kestää noin kaksi tuntia lentokoneella.', english: 'It takes about two hours by plane.' },
+    { finnish: 'Entä autolla?', english: 'And by car?' },
+    { finnish: 'Se kestää noin yksitoista tuntia.', english: 'It takes about eleven hours.' },
+    { finnish: 'Minä menen yleensä pyörällä kouluun.', english: 'I usually go to school by bike.' },
+    { finnish: 'Minulla on myös kypärä.', english: 'I also have a helmet.' },
+    { finnish: 'Onko sinulla paljon ystäviä?', english: 'Do you have many friends?' },
+    { finnish: 'Miten sanot "kiitos" englanniksi?', english: 'How do you say "thank you" in English?' },
+    { finnish: 'Miten lapset Suomessa ovat?', english: 'How are children in Finland?' },
+    { finnish: 'Olin kirjastossa eilen.', english: 'I was at the library yesterday.' },
+    { finnish: 'Missä olit?', english: 'Where were you?' },
+    { finnish: 'Tom ei ollut ystäviensä kanssa.', english: "Tom wasn't with his friends." },
+    { finnish: 'Emma ja Simon eivät olleet kotona.', english: "Emma and Simon weren't at home." },
+    { finnish: 'Oliko Tomin äiti tyytyväinen ajamaan Yhdysvalloissa?', english: "Was Tom's mom happy to drive in the US?" },
+    { finnish: 'Olivatko Tom ja hänen äitinsä motellissa?', english: 'Were Tom and his mom at a motel?' },
+    { finnish: 'Kun olin pieni, olin todella pitkä.', english: 'When I was little, I was very tall.' },
+    { finnish: 'Hiukseni olivat pitkät.', english: 'My hair was long.' },
+    { finnish: 'Nenääni oli pieni.', english: 'My nose was small.' },
+    { finnish: 'Korvani ja silmäni olivat suuret.', english: 'My ears and eyes were big.' },
+    { finnish: 'Olin ainoa lapsi perheessäni.', english: 'I was an only child in my family.' },
+    { finnish: 'Suosikkileluni olivat nallekarhu ja robotti.', english: 'My favourite toys were a bear and a robot.' },
+    { finnish: 'Parhaat ystäväni olivat Tom ja Jerry.', english: 'My best friends were Tom and Jerry.' },
+    { finnish: 'He olivat aina kanssani.', english: 'They were always with me.' },
+    { finnish: 'Lempiasiani syödä ja juoda olivat suklaa ja maito.', english: 'My favourite things to eat and drink were chocolate and milk.' },
+    { finnish: 'Anteeksi, kuinka pitkä matka täältä on Helsinkiin?', english: 'Excuse me, how far is it from here to Helsinki?' },
+    { finnish: 'Satakuusikymmentä kilometriä.', english: 'One hundred and sixty kilometers.' },
+    { finnish: 'Kuinka kauan kestää mennä sinne junalla?', english: 'How long does it take to get there by train?' },
+    { finnish: 'Se kestää tunti neljäkymmentä minuuttia.', english: 'It takes one hour and forty minutes.' },
+    { finnish: 'Ihanko totta? Kiitos.', english: 'Really? Thank you.' },
+        ];
+
+        let currentSentenceIndex = 0;
+        let correctAnswers = [];
+        let incorrectAnswers = [];
+        let usedSentences = [];
+        let currentRoundSentences = [];
+
+        // Sekoita lauseet satunnaiseen järjestykseen
+        function shuffleSentences() {
+            return sentences.sort(() => 0.5 - Math.random());
+        }
+
+        // Aloita uusi kierros 10 satunnaisella lauseella
+        function startNewRound() {
+            currentRoundSentences = shuffleSentences().slice(0, 10);
+            usedSentences = [];
+            correctAnswers = [];
+            incorrectAnswers = [];
+            currentSentenceIndex = 0;
+            document.getElementById('summary').style.display = 'none';
+            showNextSentence();
+        }
+
+        // Näytä seuraava lause
+        function showNextSentence() {
+            if (currentSentenceIndex < currentRoundSentences.length) {
+                const sentence = currentRoundSentences[currentSentenceIndex];
+                document.getElementById('finnish-sentence').textContent = sentence.finnish;
+                document.getElementById('answer').value = '';
+                document.getElementById('feedback').textContent = '';
+                document.getElementById('next-sentence').disabled = true;
+            } else {
+                showSummary();
+            }
+        }
+
+        // Tarkista vastaus
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+            const correctAnswer = currentRoundSentences[currentSentenceIndex].english.toLowerCase();
+            
+            if (userAnswer === correctAnswer) {
+                document.getElementById('feedback').textContent = 'Oikein!';
+                correctAnswers.push(currentRoundSentences[currentSentenceIndex]);
+            } else {
+                document.getElementById('feedback').textContent = `Väärin! Oikea vastaus on: ${currentRoundSentences[currentSentenceIndex].english}`;
+                incorrectAnswers.push(currentRoundSentences[currentSentenceIndex]);
+            }
+
+            document.getElementById('next-sentence').disabled = false;
+            currentSentenceIndex++;
+        }
+
+        // Näytä yhteenveto
+        function showSummary() {
+            document.getElementById('summary').style.display = 'block';
+            document.getElementById('correct-answers').textContent = `Oikein: ${correctAnswers.length}/${currentRoundSentences.length}`;
+            document.getElementById('incorrect-answers').textContent = `Harjoitusta kaipaavat: ${incorrectAnswers.length}/${currentRoundSentences.length}`;
+        }
+
+        // Aloita alusta
+        document.getElementById('start-over').addEventListener('click', startNewRound);
+
+        // Tapahtumat tarkistamiseen ja seuraavan lauseen näyttämiseen
+        document.getElementById('submit-answer').addEventListener('click', checkAnswer);
+        document.getElementById('next-sentence').addEventListener('click', showNextSentence);
+
+        // Aloita peli
+        startNewRound();
+    </script>
+
+</body>
+</html>
